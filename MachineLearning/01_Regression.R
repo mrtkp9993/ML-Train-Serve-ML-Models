@@ -1,4 +1,4 @@
-library(fastDummies)
+library(dplyr)
 library(mlr3)
 library(mlr3tuning)
 library(mlr3verse)
@@ -7,6 +7,7 @@ library(readr)
 library(summarytools)
 
 df <- read_csv("../Data/cardataset.csv")
+df <- df %>% mutate_if(is.character, factor)
 
 View(df)
 descr(df)
@@ -16,7 +17,6 @@ hist(log(df$MSRP))
 
 df$logMSRP <- df$MSRP
 df$MSRP <- NULL
-df <- dummy_cols(df, remove_selected_columns = TRUE)
 df <- na.omit(df)
 colnames(df) <- make.names(colnames(df),unique = T)
 
@@ -29,13 +29,11 @@ autoplot(task_reg)
 
 # Learners
 learners = c("regr.featureless",
-             "regr.glmnet",
              "regr.ranger",
-             "regr.rpart",
-             "regr.xgboost")
+             "regr.rpart")
 learners = lapply(learners, lrn, 
                   predict_type = "response", 
-                  predict_sets = c("train", "test", "validation"))
+                  predict_sets = c("train", "test"))
 
 # Resample
 resamplings = rsmp("cv", folds = 5)
@@ -59,8 +57,8 @@ aggr = bmr$aggregate(measures)
 print(aggr)
 
 # Fine-tuning GLMNET
-learner = lrn("regr.glmnet", predict_type="response", predict_sets = c("train", "test", "validation"))
-learner$param_set$values$alpha = to_tune(0, 1)
+learner = lrn("regr.ranger", predict_type="response", predict_sets = c("train", "test"))
+learner$param_set$values$min.node.size = to_tune(1, 10)
 
 at = auto_tuner(
   method = "random_search",
@@ -75,6 +73,11 @@ at = auto_tuner(
 at$train(task_reg)
 
 # Train with best params
-learner = lrn("regr.glmnet", predict_type="response", predict_sets = c("train", "test", "validation"))
-learner$param_set$values$alpha = at$archive$best()$alpha
+learner = lrn("regr.ranger", predict_type="response", predict_sets = c("train", "test"))
+learner$param_set$values$min.node.size = at$archive$best()$min.node.size
 learner$train(task_reg)
+
+# Plot
+object = learner$train(task_reg)$predict(task_reg)
+autoplot(object, type="xy")
+autoplot(object, type="residual")
