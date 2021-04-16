@@ -1,0 +1,17 @@
+{
+    "Driven_Wheels": "all wheel drive",
+    "Engine.Cylinders": 6,
+    "Engine.Fuel.Type": "diesel",
+    "Engine.HP": 500,
+    "Make": "Hyundai",
+    "Market.Category": "Crossover",
+    "Model": "Santa Fe",
+    "Number.of.Doors": 4,
+    "Popularity": 2000,
+    "Transmission.Type": "AUTOMATIC",
+    "Vehicle.Size": "Large",
+    "Vehicle.Style": "Convertible SUV",
+    "Year": 2010,
+    "city.mpg": 20,
+    "highway.MPG": 50
+}

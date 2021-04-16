@@ -81,3 +81,14 @@ learner$train(task_reg)
 object = learner$train(task_reg)$predict(task_reg)
 autoplot(object, type="xy")
 autoplot(object, type="residual")
+
+# Save for serve with Plumber API
+saveRDS(learner, "../Models/01_Regression.rds")
+
+feature_info = list(
+  feature_names = task_reg$feature_names,
+  feature_types = task_reg$feature_types,
+  levels = task_reg$levels()
+)
+
+saveRDS(feature_info, "../Models/01_Regression_feature_info.rds")
